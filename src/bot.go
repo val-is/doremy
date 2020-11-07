@@ -13,6 +13,7 @@ import (
 type Bot struct {
 	Config  util.Config
 	Session *discordgo.Session
+	DB      util.DBInterface
 
 	Commands map[commands.BotCommandId]commands.BotCommand
 }
@@ -56,6 +57,12 @@ func NewBotInterface(config util.Config, session *discordgo.Session) (BotInterfa
 		},
 	}
 
+	db, err := util.NewJSONDB(config.Datafile)
+	if err != nil {
+		return nil, err
+	}
+	botInterface.DB = db
+
 	return &botInterface, nil
 }
 
@@ -64,11 +71,20 @@ func (b Bot) GetInviteLink() string {
 }
 
 func (b *Bot) CleanlyClose() error {
+	if err := b.DB.Save(); err != nil {
+		return err
+	}
 	return b.Session.Close()
 }
 
 func (b *Bot) Initialize() error {
-	if err := b.Session.UpdateStatus(0, fmt.Sprintf("🌙 %shelp for more info 🌙", b.Config.Discord.Prefix)); err != nil {
+	if err := b.Session.UpdateStatusComplex(discordgo.UpdateStatusData{
+		Game: &discordgo.Game{
+			Name: fmt.Sprintf("you sleep. %shelp for more info", b.Config.Discord.Prefix),
+			Type: discordgo.GameTypeWatching,
+		},
+		AFK: false,
+	}); err != nil {
 		return err
 	}
 	return nil
@@ -106,13 +122,13 @@ func (b *Bot) messageCreate(m *discordgo.MessageCreate) error {
 
 	// run call and response
 	if command, ok := b.Commands[normalizedCommand]; ok {
-		if err := command.CommandFunc(b.Session, m, commandParts[1]); err != nil {
+		if err := command.CommandFunc(b.Session, b.DB, m, commandParts[1]); err != nil {
 			b.Session.ChannelMessageSend(m.ChannelID, "There was an internal error when running the command.")
 			return fmt.Errorf("Error running command: %s, %s", m.Content, err)
 		}
 		return nil
 	}
-	// get help embed
+	// get help embed quine thing
 	if normalizedCommand == commands.BotCommandId("help") {
 		commandHelpString := ""
 		for command := range b.Commands {

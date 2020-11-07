@@ -1,2 +1,5 @@
 # contains secrets
 doremy/config.json
+
+# contains data
+doremy/datafile.json

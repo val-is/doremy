@@ -12,7 +12,8 @@ type DiscordConfig struct {
 }
 
 type Config struct {
-	Discord DiscordConfig `json:"discord"`
+	Discord  DiscordConfig `json:"discord"`
+	Datafile string        `json:"datafile"`
 }
 
 func LoadConfig(configPath string) (Config, error) {

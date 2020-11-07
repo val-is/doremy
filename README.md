@@ -6,9 +6,8 @@ Given that the use case of this is either a) when I'm super tired and about to f
 
 Usage:
 - At night, wait for user to send something
-- Post quick poll to gather info
 - 7h later, post followup poll
-- Store info
+- Wait for response and then store info
 - Later, download stored data via endpoint for other app usage
 
 In future:
