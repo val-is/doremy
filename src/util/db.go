@@ -14,6 +14,7 @@ var (
 	ErrAlreadySleeping = fmt.Errorf("Channel already waiting for poll response")
 	ErrNotSleeping     = fmt.Errorf("Channel is not currently sleeping")
 	ErrNotPolling      = fmt.Errorf("Channel is not currently waiting for a poll response")
+	ErrPollNotFound    = fmt.Errorf("Poll message not found")
 )
 
 type SleepSession struct {
@@ -41,10 +42,12 @@ type DBInterface interface {
 	StartSleepSession(channelID string, startTime time.Time, additionalFields map[string]string) error
 	AddPollMessage(channelID string, pollMessageID string) error
 	EndSleepSession(channelID string, endTime time.Time, qualityPoll int, additionalFields map[string]string) (SleepSession, error)
-	DeletePendingSleepSessionPoll(channelID string) error
+	UpdatePollingData(pollMessageID string, quality int) (SleepSession, error)
+	DeletePendingSleepSession(channelID string) error
 
 	GetChannelPending(channelID string) (startTime time.Time, pending bool)
 	GetPollActive(pollMessageID string) bool
+	GetAllUnaddedPolls() []SleepSession
 
 	GetAllSleepSessions() []SleepSession
 
@@ -89,7 +92,7 @@ func (db *DB) AddPollMessage(channelID string, pollMessageID string) error {
 
 func (db *DB) EndSleepSession(channelID string, endTime time.Time, qualityPoll int, additionalFields map[string]string) (SleepSession, error) {
 	for i, sleepSession := range db.Data.SleepSessions {
-		if sleepSession.ChannelID == channelID && sleepSession.Pending {
+		if sleepSession.ChannelID == channelID && sleepSession.Pending && sleepSession.PollMessageID != "" {
 			updatedAdditionalFields := sleepSession.AdditionalFields
 			for k, v := range additionalFields {
 				updatedAdditionalFields[k] = v
@@ -100,6 +103,7 @@ func (db *DB) EndSleepSession(channelID string, endTime time.Time, qualityPoll i
 			sessionData.Quality = qualityPoll
 			sessionData.AdditionalFields = updatedAdditionalFields
 			sessionData.Pending = false
+			db.Data.SleepSessions[i] = sessionData
 			return db.Data.SleepSessions[i], nil
 		}
 	}
@@ -107,9 +111,21 @@ func (db *DB) EndSleepSession(channelID string, endTime time.Time, qualityPoll i
 	return SleepSession{}, ErrNotPolling
 }
 
-func (db *DB) DeletePendingSleepSessionPoll(channelID string) error {
+func (db *DB) UpdatePollingData(pollMessageID string, quality int) (SleepSession, error) {
 	for i, sleepSession := range db.Data.SleepSessions {
-		if sleepSession.ChannelID == channelID && sleepSession.Pending && sleepSession.PollMessageID != "" {
+		if sleepSession.PollMessageID == pollMessageID && pollMessageID != "" {
+			updatedSleepSession := sleepSession
+			updatedSleepSession.Quality = quality
+			db.Data.SleepSessions[i] = updatedSleepSession
+			return db.Data.SleepSessions[i], nil
+		}
+	}
+	return SleepSession{}, ErrPollNotFound
+}
+
+func (db *DB) DeletePendingSleepSession(channelID string) error {
+	for i, sleepSession := range db.Data.SleepSessions {
+		if sleepSession.ChannelID == channelID && sleepSession.Pending {
 			// special case of only one item left to make sure indexing works
 			if len(db.Data.SleepSessions) == 1 {
 				db.Data.SleepSessions = make([]SleepSession, 0)
@@ -120,7 +136,7 @@ func (db *DB) DeletePendingSleepSessionPoll(channelID string) error {
 			return nil
 		}
 	}
-	return ErrNotPolling
+	return ErrNotSleeping
 }
 
 func (db *DB) GetChannelPending(channelID string) (startTime time.Time, pending bool) {
@@ -141,6 +157,16 @@ func (db *DB) GetPollActive(pollMessageID string) bool {
 		}
 	}
 	return false
+}
+
+func (db *DB) GetAllUnaddedPolls() []SleepSession {
+	sessions := make([]SleepSession, 0)
+	for _, sleepSession := range db.Data.SleepSessions {
+		if sleepSession.PollMessageID == "" && sleepSession.Pending {
+			sessions = append(sessions, sleepSession)
+		}
+	}
+	return sessions
 }
 
 func (db *DB) GetAllSleepSessions() []SleepSession {

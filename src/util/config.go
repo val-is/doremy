@@ -11,9 +11,16 @@ type DiscordConfig struct {
 	Prefix string `json:"prefix"`
 }
 
+type PollingConfig struct {
+	Emojis              []string `json:"emojis"`
+	DaemonTime          float64  `json:"daemon-polling-time"`
+	SleepPeriodDuration float64  `json:"sleep-period-min-time"`
+}
+
 type Config struct {
 	Discord  DiscordConfig `json:"discord"`
 	Datafile string        `json:"datafile"`
+	Polling  PollingConfig `json:"polling"`
 }
 
 func LoadConfig(configPath string) (Config, error) {

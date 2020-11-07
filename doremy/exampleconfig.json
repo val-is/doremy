@@ -3,5 +3,16 @@
         "apitoken": "your-discord-token",
         "prefix": "$"
     },
-    "datafile": "doremy/datafile.json"
+    "datafile": "doremy/datafile.json",
+    "polling": {
+        "emojis": [
+            "1️⃣",
+            "2️⃣",
+            "3️⃣",
+            "4️⃣",
+            "5️⃣"
+        ],
+        "daemon-polling-time": 30,
+        "sleep-period-min-time": 420
+    }
 }
