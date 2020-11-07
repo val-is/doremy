@@ -1,0 +1,6 @@
+{
+    "discord": {
+        "apitoken": "your-discord-token",
+        "prefix": "$"
+    }
+}
