@@ -210,8 +210,10 @@ func (b *Bot) messageReactionAdd(m *discordgo.MessageReactionAdd) error {
 		return fmt.Errorf("Error when handling reaction: %s", err)
 	}
 
+	hSlept := int(sessionRecap.Duration.Hours())
+	mSlept := int(sessionRecap.Duration.Minutes()) - 60*hSlept
 	b.Session.ChannelMessageSend(m.ChannelID,
-		fmt.Sprintf("Good morning! You slept for %d hours, %d minute(s)", int(sessionRecap.Duration.Hours()), int(sessionRecap.Duration.Minutes())))
+		fmt.Sprintf("You slept for %d hours, %d minute(s)", hSlept, mSlept))
 
 	return nil
 }
@@ -234,7 +236,7 @@ func (b *Bot) processPollDaemon() error {
 	}
 	for _, poll := range unaddedPolls {
 		if time.Now().Sub(poll.Start) > pollDelay {
-			b.Session.ChannelMessageSend(poll.ChannelID, "Early good morning!")
+			b.Session.ChannelMessageSend(poll.ChannelID, "Good morning!")
 			message, _ := b.Session.ChannelMessageSend(poll.ChannelID, "React to how you feel rn (1 is bad, 5 is good)")
 			for i := 0; i < 5; i++ {
 				b.Session.MessageReactionAdd(message.ChannelID, message.ID, b.Config.Polling.Emojis[i])
