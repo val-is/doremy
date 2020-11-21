@@ -18,8 +18,8 @@ var (
 )
 
 type sleepSessionStruct struct {
-	Start            time.Time         `json:"end"`
-	End              time.Time         `json:"start"`
+	Start            time.Time         `json:"start"`
+	End              time.Time         `json:"end"`
 	Duration         time.Duration     `json:"duration"`
 	Quality          int               `json:"quality"`
 	AdditionalFields map[string]string `json:"additional-fields"`
