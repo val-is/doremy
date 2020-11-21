@@ -1,4 +1,4 @@
-package util
+package doremy
 
 import (
 	"encoding/json"
@@ -6,35 +6,35 @@ import (
 	"os"
 )
 
-type DiscordConfig struct {
+type discordConfig struct {
 	Token  string `json:"apitoken"`
 	Prefix string `json:"prefix"`
 }
 
-type PollingConfig struct {
+type pollingConfig struct {
 	Emojis              []string `json:"emojis"`
 	DaemonTime          float64  `json:"daemon-polling-time"`
 	SleepPeriodDuration float64  `json:"sleep-period-min-time"`
 }
 
-type Config struct {
-	Discord  DiscordConfig `json:"discord"`
+type configStruct struct {
+	Discord  discordConfig `json:"discord"`
 	Datafile string        `json:"datafile"`
-	Polling  PollingConfig `json:"polling"`
+	Polling  pollingConfig `json:"polling"`
 }
 
-func LoadConfig(configPath string) (Config, error) {
-	config := Config{}
+func LoadConfig(configPath string) (configStruct, error) {
+	config := configStruct{}
 	file, err := os.Open(configPath)
 	if err != nil {
-		return Config{}, err
+		return configStruct{}, err
 	}
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		return Config{}, err
+		return configStruct{}, err
 	}
 	if err := json.Unmarshal(data, &config); err != nil {
-		return Config{}, err
+		return configStruct{}, err
 	}
 	return config, nil
 }

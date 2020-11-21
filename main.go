@@ -8,11 +8,10 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	doremy "github.com/val-is/doremy/src"
-	"github.com/val-is/doremy/src/util"
 )
 
 func main() {
-	config, err := util.LoadConfig("doremy/config.json")
+	config, err := doremy.LoadConfig("doremy/config.json")
 	if err != nil {
 		log.Printf("Error loading config: %s", err)
 		return
