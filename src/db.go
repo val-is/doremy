@@ -2,7 +2,7 @@ package doremy
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io/ioutil"
 	"os"
 	"time"
@@ -11,10 +11,10 @@ import (
 // the most scuffed data storage solution of all time
 
 var (
-	errAlreadySleeping = fmt.Errorf("Channel already waiting for poll response")
-	errNotSleeping     = fmt.Errorf("Channel is not currently sleeping")
-	errNotPolling      = fmt.Errorf("Channel is not currently waiting for a poll response")
-	errPollNotFound    = fmt.Errorf("Poll message not found")
+	errAlreadySleeping = errors.New("channel already waiting for poll response")
+	errNotSleeping     = errors.New("channel is not currently sleeping")
+	errNotPolling      = errors.New("channel is not currently waiting for a poll response")
+	errPollNotFound    = errors.New("poll message not found")
 )
 
 type sleepSessionStruct struct {

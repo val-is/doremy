@@ -148,7 +148,7 @@ func (b *Bot) messageCreate(m *discordgo.MessageCreate) error {
 	channel, err := b.session.Channel(m.ChannelID)
 	if err != nil {
 		b.session.ChannelMessageSend(m.ChannelID, "Error getting channel info.")
-		return fmt.Errorf("Error getting channel info: %s", err)
+		return fmt.Errorf("error getting channel info: %s", err)
 	}
 	if channel.GuildID != "" {
 		b.session.ChannelMessageSend(m.ChannelID, "This bot's really only made to be used in dms.")
@@ -159,7 +159,7 @@ func (b *Bot) messageCreate(m *discordgo.MessageCreate) error {
 	if command, ok := b.commands[normalizedCommand]; ok {
 		if err := command.CommandFunc(b, m, commandParts[1]); err != nil {
 			b.session.ChannelMessageSend(m.ChannelID, "There was an internal error when running the command.")
-			return fmt.Errorf("Error running command: %s, %s", m.Content, err)
+			return fmt.Errorf("error running command: %s, %s", m.Content, err)
 		}
 		return nil
 	}
@@ -209,8 +209,8 @@ func (b *Bot) messageReactionAdd(m *discordgo.MessageReactionAdd) error {
 
 	sessionRecap, err := b.db.EndSleepSession(m.ChannelID, time.Now(), pollResult, map[string]string{})
 	if err != nil {
-		b.session.ChannelMessageSend(m.ChannelID, fmt.Sprintf("There was an internal error when handling the reaction"))
-		return fmt.Errorf("Error when handling reaction: %s", err)
+		b.session.ChannelMessageSend(m.ChannelID, "There was an internal error when handling the reaction")
+		return fmt.Errorf("error when handling reaction: %s", err)
 	}
 
 	hSlept := int(sessionRecap.Duration.Hours())
@@ -238,7 +238,7 @@ func (b *Bot) processPollDaemon() error {
 		return err
 	}
 	for _, poll := range unaddedPolls {
-		if time.Now().Sub(poll.Start) < pollDelay {
+		if time.Since(poll.Start) < pollDelay {
 			continue
 		}
 		if err := b.sendPoll(poll); err != nil {
