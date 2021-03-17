@@ -18,9 +18,10 @@ type pollingConfig struct {
 }
 
 type configStruct struct {
-	Discord  discordConfig `json:"discord"`
-	Datafile string        `json:"datafile"`
-	Polling  pollingConfig `json:"polling"`
+	Discord          discordConfig     `json:"discord"`
+	Datafile         string            `json:"datafile"`
+	Polling          pollingConfig     `json:"polling"`
+	AdditionalFields map[string]string `json:"additional-fields"`
 }
 
 func LoadConfig(configPath string) (configStruct, error) {

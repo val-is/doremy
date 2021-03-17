@@ -207,7 +207,7 @@ func (b *Bot) messageReactionAdd(m *discordgo.MessageReactionAdd) error {
 		return nil
 	}
 
-	sessionRecap, err := b.db.EndSleepSession(m.ChannelID, time.Now(), pollResult, map[string]string{})
+	sessionRecap, err := b.db.EndSleepSession(m.ChannelID, time.Now(), pollResult, b.config.AdditionalFields)
 	if err != nil {
 		b.session.ChannelMessageSend(m.ChannelID, "There was an internal error when handling the reaction")
 		return fmt.Errorf("error when handling reaction: %s", err)
@@ -250,8 +250,8 @@ func (b *Bot) processPollDaemon() error {
 
 func (b *Bot) sendPoll(poll sleepSessionStruct) error {
 	b.session.ChannelMessageSend(poll.ChannelID, "Good morning!")
-	message, _ := b.session.ChannelMessageSend(poll.ChannelID, "React to how you feel rn (1 is bad, 5 is good)")
-	for i := 0; i < 5; i++ {
+	message, _ := b.session.ChannelMessageSend(poll.ChannelID, "React based on how you feel:")
+	for i := 0; i < len(b.config.Polling.Emojis); i++ {
 		b.session.MessageReactionAdd(message.ChannelID, message.ID, b.config.Polling.Emojis[i])
 	}
 	if err := b.db.AddPollMessage(poll.ChannelID, message.ID); err != nil {
