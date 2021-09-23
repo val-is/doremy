@@ -50,6 +50,7 @@ type dbInterface interface {
 	GetAllUnaddedPolls() []sleepSessionStruct
 
 	GetAllSleepSessions() []sleepSessionStruct
+	GetSleepSessionsByUserChannel(userID string) []sleepSessionStruct
 
 	Save() error
 	Load() error
@@ -171,6 +172,16 @@ func (db *dbStruct) GetAllUnaddedPolls() []sleepSessionStruct {
 
 func (db *dbStruct) GetAllSleepSessions() []sleepSessionStruct {
 	return db.Data.SleepSessions
+}
+
+func (db *dbStruct) GetSleepSessionsByUserChannel(channelID string) []sleepSessionStruct {
+	sendingSessions := make([]sleepSessionStruct, 0)
+	for _, v := range db.Data.SleepSessions {
+		if v.ChannelID == channelID {
+			sendingSessions = append(sendingSessions, v)
+		}
+	}
+	return sendingSessions
 }
 
 func (db *dbStruct) Save() error {

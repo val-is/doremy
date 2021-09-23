@@ -1,16 +1,20 @@
 package doremy
 
 import (
+	"bytes"
+	"encoding/json"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-type botCommandId string
-type botCommand struct {
-	CommandDoc  string
-	CommandFunc func(*Bot, *discordgo.MessageCreate, string) error
-}
+type (
+	botCommandId string
+	botCommand   struct {
+		CommandDoc  string
+		CommandFunc func(*Bot, *discordgo.MessageCreate, string) error
+	}
+)
 
 func commandPing(b *Bot, m *discordgo.MessageCreate, _ string) error {
 	b.session.ChannelMessageSend(m.ChannelID, "Pong!")
@@ -51,5 +55,16 @@ func commandStopSleeping(b *Bot, m *discordgo.MessageCreate, _ string) error {
 	if err := b.sendPoll(sleepSession); err != nil {
 		return err
 	}
+	return nil
+}
+
+func commandGetData(b *Bot, m *discordgo.MessageCreate, _ string) error {
+	sessions := b.db.GetSleepSessionsByUserChannel(m.ChannelID)
+	sessionsJson, err := json.Marshal(sessions)
+	if err != nil {
+		b.session.ChannelMessageSend(m.ChannelID, "There was an issue processing your session data")
+		return err
+	}
+	b.session.ChannelFileSend(m.ChannelID, "data.json", bytes.NewReader(sessionsJson))
 	return nil
 }

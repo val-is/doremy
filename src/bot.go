@@ -38,7 +38,7 @@ func NewBotInterface(config configStruct, session *discordgo.Session) (BotInterf
 
 	botInterface.session.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
 		if err := botInterface.messageCreate(m); err != nil {
-			log.Printf("Error handling message \"%s\": %s", m.Message.Content, err)
+			log.Printf("Error handling message \"%s\": %s", m.Content, err)
 		}
 	})
 	botInterface.session.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageReactionAdd) {
@@ -68,6 +68,10 @@ func NewBotInterface(config configStruct, session *discordgo.Session) (BotInterf
 		"stop": {
 			CommandDoc:  "🛑",
 			CommandFunc: commandStopSleeping,
+		},
+		"data": {
+			CommandDoc:  "📊",
+			CommandFunc: commandGetData,
 		},
 	}
 
@@ -187,7 +191,7 @@ func (b *Bot) messageCreate(m *discordgo.MessageCreate) error {
 }
 
 func (b *Bot) messageReactionAdd(m *discordgo.MessageReactionAdd) error {
-	if m.MessageReaction.UserID == b.session.State.User.ID {
+	if m.UserID == b.session.State.User.ID {
 		return nil
 	}
 
@@ -198,7 +202,7 @@ func (b *Bot) messageReactionAdd(m *discordgo.MessageReactionAdd) error {
 
 	pollResult := -1
 	for val, emoji := range b.config.Polling.Emojis {
-		if emoji == m.MessageReaction.Emoji.Name {
+		if emoji == m.Emoji.Name {
 			pollResult = val
 			break
 		}
