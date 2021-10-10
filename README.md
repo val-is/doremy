@@ -1,6 +1,31 @@
 # doremy
 Sleep tracking tool -- this is intended to be used in some experimentation that I'm doing.
 
+## installation and running
+
+to download:
+
+```
+git clone https://github.com/val-is/doremy.git
+```
+
+to configure:
+
+copy `doremy/exampleconfig.json` to `doremy/config.json`, fill in the blanks
+
+to run:
+
+```
+docker build -t doremy .
+docker volume create doremy-vol
+docker run -d \
+    --name doremy \
+    -v doremy-vol:/doremy \
+    doremy
+```
+
+## misc
+
 Specwise, I want this to be super easy to use as a Discord bot (for the time being).
 Given that the use case of this is either a) when I'm super tired and about to fall asleep or b) when I've just woken up, there's not much room for scuffedness.
 
@@ -14,9 +39,6 @@ In future:
 - Generate data vis
 - Control "experiments"
 - Provide suggestions based on data trends
-
-## configuration
-copy `doremy/exampleconfig.json` to `doremy/config.json`, fill in the blanks
 
 ## a note on versioning and data storage
 you know what's a really awesome design decision (/s)? not versioning data being stored.
